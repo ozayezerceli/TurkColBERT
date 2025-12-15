@@ -1,19 +1,29 @@
 # TurkColBERT: Late-Interaction Retrieval for Turkish IR
 
-This repository accompanies the TurkColBERT paper and releases the MUVERA-based late-interaction implementation, benchmarks, and reproducibility assets for Turkish information retrieval. The paper PDF lives in `docs/paper/2511.16528v1.pdf`.
+[![arXiv](https://img.shields.io/badge/arXiv-2511.16528-B31B1B.svg)](https://arxiv.org/abs/2511.16528) [![Hugging Face Blog](https://img.shields.io/badge/Blog-Hugging%20Face-ffbd2e.svg)](https://huggingface.co/blog/nmmursit/late-interaction-models) [![🤗 Models](https://img.shields.io/badge/🤗-Models-yellow.svg)](https://huggingface.co/collections/newmindai/turkcolbert-turkish-late-interaction-models) [![YouTube](https://img.shields.io/badge/YouTube-Demo-red.svg)](https://www.youtube.com/watch?v=bZamvZojMA0)
+
+
+This repository accompanies the TurkColBERT paper and releases the MUVERA-based late-interaction implementation, benchmarks, and reproducibility assets for Turkish information retrieval.
 
 ![TurkColBERT](docs/figures/TurkColBERT.png)
 
+## Key Contributions
+
+- **TurkColBERT**: First systematic comparison of dense bi-encoders and late-interaction models for Turkish IR
+- **Semantic Adaptation**: Fine-tuned multilingual encoders to Turkish using NLI + STS tasks, then adapted to ColBERT-style retrievers
+- **Parameter Efficiency**: Ultra-compact BERT-Hash variants retain strong performance with as few as 0.2–1M parameters
+- **Production Ready**: MUVERA + Rerank delivers 3.3× speedup over PLAID with +1–2% mAP gain for scalable Turkish IR
+
 ## What’s inside
-- `src/lateinteractionmodels/muvera.py`: MUVERA implementation (SimHash + sparse projection + aggregation).
+- `src/muvera.py`: MUVERA implementation (SimHash + sparse projection + aggregation).
 - `benchmarks/`: runnable scripts for MUVERA, PLAID, and reranking comparisons plus generated results/plots.
 - `benchmarks/BenchmarkResults/`: aggregated metrics, figures, and helper scripts to regenerate visualizations.
 - `notebooks/`: fine-tuning and analysis notebooks used in the paper.
 - `docs/`: paper PDFs, blog materials, and supporting figures.
 
 ```
-lateinteractionmodels/
-├── src/lateinteractionmodels/              # Python package
+TurkColBERT/
+├── src/              # Python package
 │   └── muvera.py
 ├── benchmarks/                             # Experiments & outputs
 │   ├── benchmark_with_muvera.py
@@ -97,22 +107,55 @@ sims = batch_cosine_similarity(np.array([query]), docs)
 top_k = np.argsort(-sims[0])[:5]
 ```
 
-## Datasets
-Evaluations cover five Turkish BEIR collections:
-- SciFact-TR — `AbdulkaderSaoud/scifact-tr`
-- ArguAna-TR — `trmteb/arguana-tr`
-- Scidocs-TR — `trmteb/scidocs-tr`
-- FiQA-TR — `trmteb/fiqa-tr`
-- NFCorpus-TR — `trmteb/nfcorpus-tr`
+Evaluations cover five Turkish BEIR benchmark datasets spanning diverse domains:
+
+| Dataset | Domain | # Queries | # Corpus | Task Type |
+|---------|--------|-----------|----------|-----------|
+| [SciFact-TR](https://huggingface.co/datasets/AbdulkaderSaoud/scifact-tr) | Scientific Claims | 1,110 | 5,180 | Fact Checking |
+| [Arguana-TR](https://huggingface.co/datasets/trmteb/arguana-tr) | Argument Mining | 500 | 10,000 | Argument Retrieval |
+| [FiQA-TR](https://huggingface.co/datasets/selmanbaysan/fiqa-tr) | Financial | 600 | 50,000 | Answer Retrieval |
+| [Scidocs-TR](https://huggingface.co/datasets/trmteb/scidocs-tr) | Scientific | 1,000 | 25,000 | Citation Prediction |
+| [NFCorpus-TR](https://huggingface.co/datasets/trmteb/nfcorpus-tr) | Nutrition | 3,240 | 3,630 | Document Retrieval |
+
 
 ## Models (Hugging Face)
-- `newmindai/col-ettin-encoder-150M-TR`
-- `newmindai/col-ettin-encoder-32M-TR`
-- `newmindai/ColmmBERT-base-TR`
-- `newmindai/ColmmBERT-small-TR`
-- `newmindai/TurkEmbed4Retrieval`
-- `ytu-ce-cosmos/turkish-e5-large`, `ytu-ce-cosmos/turkish-colbert`
-- Hash variants: `newmindai/colbert-hash-{nano,pico,femto}-tr`
+ Model | Parameters (M) | Type |
+|-------|---------------|------|
+| **Dense Bi-Encoder Models** | | |
+| TurkEmbed4Retrieval | 300 | Dense |
+| turkish-e5-large | 600 | Dense |
+| **Late-Interaction Models (Token-Level Matching)** | | |
+| turkish-colbert | 100 | Late-interaction |
+| ColumBERT-small-TR | 140 | Late-interaction |
+| ColumBERT-base-TR | 310 | Late-interaction |
+| col-ettin-150M-TR | 150 | Late-interaction |
+| col-ettin-32M-TR | 32 | Late-interaction |
+| mxbai-edge-colbert-v0-32m-tr | 32 | Late-interaction |
+| mxbai-edge-colbert-v0-17m-tr | 17 | Late-interaction |
+| **Ultra-Compact Models (BERT-Hash)** | | |
+| colbert-hash-nano-tr | 1.0 | Hash-based |
+| colbert-hash-pico-tr | 0.4 | Hash-based |
+| colbert-hash-femto-tr | 0.2 | Hash-based |
+
+<img width="4608" height="1036" alt="image" src="https://github.com/user-attachments/assets/cad30415-ca0b-4e58-b8e9-61190dcaf574" />
+
+## Three-Stage Training Pipeline
+
+TurkColBERT uses a systematic three-stage adaptation pipeline:
+
+1. **Stage 1 — Semantic Fine-Tuning**: Strengthen Turkish sentence comprehension through NLI + STS tasks using Sentence Transformers
+2. **Stage 2 — Late-Interaction Adaptation**: Transform encoders into ColBERT-style retrievers using PyLate and MS MARCO-TR triplets
+3. **Stage 3 — Scalable Deployment**: Integrate MUVERA for efficient indexing with 3.3× speedup over PLAID
+
+<img width="1184" height="453" alt="image" src="https://github.com/user-attachments/assets/718d1595-ed54-4bf7-b140-3c6e6e08faf8" />
+
+## Key Results
+
+- **Late-interaction models consistently outperform dense baselines** across all Turkish BEIR benchmarks
+- **ColumBERT-base-TR achieves highest mAP** on 4 out of 5 datasets with strong efficiency balance
+- **Ultra-compact BERT-Hash variants** (0.2–1M parameters) retain 70%+ of larger model performance
+- **MUVERA + Rerank delivers 3.3× speedup** over PLAID with +1–2% mAP gain for production deployment
+
 
 ## Results & artifacts
 - Metrics, CSV/JSON dumps, and plots live in `benchmarks/BenchmarkResults/`.
@@ -124,14 +167,23 @@ Evaluations cover five Turkish BEIR collections:
 - Blog draft and figures: `docs/blog/`.
 
 ## Citation
-If you use this work, please cite the TurkColBERT paper:
+If you use TurkColBERT in your research, please cite our paper:
 
-Ezerceli, Ö., Bayraktar, R., ElHussieni, M., Terzioglu, F. B., Taş, S., Çelebi, Y., Asker, Y. (2025). TurkColBERT: A Benchmark of Dense and Late-Interaction Models for Turkish Information Retrieval. Available at [`docs/paper/2511.16528v1.pdf`](https://arxiv.org/abs/2511.16528).
-
+**TurkColBERT: A Benchmark of Dense and Late-Interaction Models for Turkish Information Retrieval** has been ACCEPTED at ACLing-2025 and will be published in Procedia Computer Science by ELSEVIER. The preprint is available on arXiv: [2511.16528](https://arxiv.org/abs/2511.16528).
+```bibtex
+@inproceedings{ezerceli2025turkcolbert,
+  title={TurkColBERT: A Benchmark of Dense and Late-Interaction Models for Turkish Information Retrieval},
+  author={Ezerceli, {\"O}zay and Bayraktar, Reyhan and ElHussieni, Mahmoud and Terzioglu, Fatma Bet{\"u}l and Ta{\c{s}}, Selva and {\c{C}}elebi, Yusuf and Asker, Ya{\u{g}}{\i}z},
+  booktitle={Proceedings of ACLing-2025},
+  year={2025},
+  publisher={Elsevier},
+  series={Procedia Computer Science}
+}
+```
 You can watch [Full Local Demo of TurkColBERT](https://www.youtube.com/watch?v=bZamvZojMA0) by [Fahd Mirza](https://www.youtube.com/@fahdmirza). We appreciated his work and support to open source community!
 
 ## License
 MIT License — see `LICENSE`.
 
 ## Contact
-Questions or collaboration: oezerceli@newmind.ai (lead author) or open an issue.
+Questions or collaboration: oezerceli@newmind.ai or open an issue.
