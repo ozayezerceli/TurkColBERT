@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lateinteractionmodels"
+version = "0.1.0"
+description = "MUVERA-based late-interaction benchmarks for Turkish information retrieval"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Ozay Ezerceli", email = "oezerceli@newmind.ai" }
+]
+dependencies = [
+  "pylate>=1.0.0",
+  "datasets>=2.14.0",
+  "transformers>=4.37.0",
+  "torch>=2.1.0",
+  "numpy>=1.24.0",
+  "pandas>=2.0.0",
+  "matplotlib>=3.7.0",
+  "seaborn>=0.12.0",
+  "tqdm>=4.66.0",
+  "huggingface-hub>=0.24.0",
+  "pyarrow>=14.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/oezerceli/lateinteractionmodels"
+Paper = "docs/paper/2511.16528v1.pdf"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

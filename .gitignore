@@ -1,0 +1,31 @@
+# Python / packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.python-version
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+.ipynb_checkpoints/
+
+# Caches / logs
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# Project outputs
+benchmarks/BenchmarkResults/muvera_results/
+benchmarks/comprehensive_results/
+benchmarks/*.csv
+Other/
+
